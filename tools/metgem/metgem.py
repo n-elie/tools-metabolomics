@@ -8,6 +8,19 @@ import sys
 import os
 import numpy as np
 
+def get_file_format(input_file):
+    ext = os.path.splitext(input_file)[1].lower()
+    if ext in ('.mgf', '.msp'):
+        return ext[1:]
+    
+    with open(input_file, 'r') as f:
+        head = next(f)
+        if head.startswith('BEGIN IONS'):
+            return 'mgf'
+        elif head.startswith('NAME:'):
+            return 'msp'
+        
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='MetGem - Molecular Network')
     
@@ -25,21 +38,21 @@ if __name__ == "__main__":
     parser.add_argument('--is_ms1_data', default=False, action='store_true', help='')
     
     args = parser.parse_args()
-    print(args)
-    
-    ext = os.path.splitext(args.input)[1].lower()
-    
+   
     mzs = []
     spectra = []
+
+    file_format = get_file_format(args.input)
     
-    if ext == '.mgf':
+    if file_format == 'mgf':
         read = read_mgf
         mz_keys = ['pepmass']
-    elif ext == '.msp':
+    elif file_format == 'msp':
         read = read_msp
         mz_keys = ['precursormz', 'exactmass', 'mw']
     else:
-         sys.exit(1)
+        raise ValueError('Unknown file format')
+        sys.exit(1)
          
     for params, data in read(args.input, ignore_unknown=True):
         if not args.is_ms1_data:
@@ -61,5 +74,5 @@ if __name__ == "__main__":
 
     scores = compute_similarity_matrix(mzs, spectra,
                                               args.mz_tolerance, args.min_matched_peaks)
-    
-    np.savez_compressed(args.output, scores=scores)
+    with open(args.output, 'wb') as f:
+        np.savez_compressed(f, scores=scores)
