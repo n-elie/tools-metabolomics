@@ -1,0 +1,36 @@
+<tool id="metgem" name="metgem" version="@TOOL_VERSION@+galaxy@VERSION_SUFFIX@" profile="20.05">
+    <description>Molecular networking based on MS/MS spectra</description>
+    <macros>
+        <token name="@TOOL_VERSION@">0.6.2</token>
+        <token name="@VERSION_SUFFIX@">0</token>
+    </macros>
+    <requirements>
+        <requirement type="package" version="@TOOL_VERSION@">libmetgem</requirement>
+        <requirement type="package" version="1.7.3">scipy</requirement>
+    </requirements>
+    <command detect_errors="exit_code"><![CDATA[
+        python -c 'import sys; print(sys.prefix)' && python '${__tool_directory__}/metgem.py'
+        --input '$input'
+        --output '$output'
+    ]]></command>
+    <inputs>
+        <param argument="--input" type="data" format="mgf,msp" label="Input file" help="Input file to process." />
+        <param argument="--mz_tolerance" type="float" value="0.02" label="m/z tolerance" help="Maximun difference (in Da) between tzo ions masses to consider they correspond to the same ion." />
+        <param argument="--use_filtering" type="boolean" checked="true" label="Use Filtering" help="Use Filtering." />
+        <param argument="--min_intensity" type="integer" value="0" label="Minimum Intensity" help="Filter out peaks with relative intensity below this percentage of highest intense peak." />
+        <param argument="--min_matched_peaks" type="integer" value="4" label="Minimum Matched Peaks" help="Minimum number of common peaks between two spectra." />
+        <param argument="--parent_filter_tolerance" type="integer" value="17" label="Parent Filter Tolerance" help="Peaks with a m/z ratio inside the m/z precursor +/- tolerance will be filtered out." />
+        <param argument="--min_matched_peaks_search" type="integer" value="6" label="Miminum Matched Peaks Search" help="Window rank filter's parameters: for each peak in the spectrum, it is kept only if it is in top `min_matched_peaks_search` in the +/-`matched_peaks_window` window." />
+        <param argument="--matched_peaks_window" type="integer" value="50" label="Matched Peaks Window" help="Window rank filter's parameters: for each peak in the spectrum, it is kept only if it is in top `min_matched_peaks_search` in the +/-`matched_peaks_window` window." />
+        <param argument="--is_ms1_data" type="boolean" checked="false" label="Treat Data as MS1" help="Check this if the precursor ion's mass is unknown. Only fragments will be compared." />
+    </inputs>
+    <outputs>
+        <data name="output" label="${tool.name} on ${on_string}" format="npz" />
+    </outputs>
+    <help><![CDATA[
+        TODO: Fill in help.
+    ]]></help>
+    <citations>
+        <citation type="doi">10.1021/acs.analchem.8b03099</citation>
+    </citations>
+</tool>
